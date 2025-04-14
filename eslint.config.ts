@@ -1,28 +1,27 @@
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import Module from 'node:module';
+import assert from 'node:assert';
 
 import eslintJs from '@eslint/js';
+import type { ESLint, Linter } from 'eslint';
+import stylistic from '@stylistic/eslint-plugin';
 import prettierConfig from 'eslint-config-prettier';
-// @ts-expect-error No type definitions available for this package. https://github.com/ota-meshi/eslint-plugin-regexp/issues/723
 import * as regexpPlugin from 'eslint-plugin-regexp';
 import globals from 'globals';
+import pkgJson from './package.json' with { type: 'json' };
 
-const require = Module.createRequire(import.meta.url);
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const defaultSourceType: Linter.SourceType = 'module';
+assert(pkgJson.type === defaultSourceType);
 
-/** @type {'module' | 'commonjs'} */
-const defaultSourceType =
-  require(join(__dirname, 'package.json')).type ?? 'commonjs';
-
-/** @type {import('eslint').Linter.FlatConfig[]} */
-export default [
+const configs = [
   eslintJs.configs.recommended,
   prettierConfig,
   regexpPlugin.configs['flat/recommended'],
 
   {
+    plugins: {
+      // Cast needed due to type mismatch even though this is the recommmended way to use the plugin.
+      '@stylistic': stylistic as ESLint.Plugin
+    },
+
     linterOptions: {
       reportUnusedDisableDirectives: 'error'
     },
@@ -45,6 +44,9 @@ export default [
       'no-implicit-globals': ['error'],
       'no-unused-vars': ['error', { vars: 'local', argsIgnorePattern: '^_' }],
       'no-useless-rename': ['error'],
+      'no-useless-computed-key': 'error',
+      'no-useless-constructor': 'error',
+      'no-useless-return': 'error',
       'arrow-body-style': ['error', 'as-needed'],
       'no-lonely-if': 'error',
       'prefer-object-has-own': 'error',
@@ -57,6 +59,9 @@ export default [
       'no-constructor-return': 'error',
       'no-unmodified-loop-condition': 'error',
       'no-useless-assignment': 'error',
+
+      // @stylistic rules - needed as prettier doesn't handle these
+      '@stylistic/quotes': ['error', 'single', { avoidEscape: true }],
 
       /* eslint-plugin-regexp */
       'regexp/prefer-character-class': ['error', { minAlternatives: 2 }],
@@ -98,4 +103,6 @@ export default [
     // `ignores` field must be in the very bottom config.
     ignores: ['dist/**/*', '**/*-polyfill.*']
   }
-];
+] as const satisfies Linter.Config[];
+
+export default configs;

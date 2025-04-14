@@ -2,7 +2,11 @@ const CONFIG_KEY = 'ytaf-configuration';
 
 const configOptions = new Map([
   ['enableAdBlock', { default: true, desc: 'Enable ad blocking' }],
-  ['removeShorts', { default: true, desc: 'Remove Shorts from subscriptions' }],
+  ['upgradeThumbnails', { default: false, desc: 'Upgrade thumbnail quality' }],
+  [
+    'removeShorts',
+    { default: false, desc: 'Remove Shorts from subscriptions' }
+  ],
   ['enableSponsorBlock', { default: true, desc: 'Enable SponsorBlock' }],
   [
     'enableSponsorBlockSponsor',
@@ -29,6 +33,13 @@ const configOptions = new Map([
     {
       default: true,
       desc: 'Skip non-music segments in music videos'
+    }
+  ],
+  [
+    'enableSponsorBlockPreview',
+    {
+      default: false,
+      desc: 'Skip recaps and previews'
     }
   ],
   [
